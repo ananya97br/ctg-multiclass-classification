@@ -1,4 +1,4 @@
-# Cardiotocography-Based Fetal Health Classification
+# Multiclass Classification of Fetal Health using Cardiotocography (CTG) Data
 
 TEAM #24:
 1. ANANYA BELIMALLUR RAJASHEKAR (PES2UG24CS057)
@@ -282,8 +282,6 @@ The two model-training notebooks can be executed independently after the preproc
 ---
 
 ## Reproducibility
-
-Several precautions are used to improve reproducibility:
 
 - A fixed train-test split is used.
 - Random states are specified where supported.
