@@ -25,6 +25,7 @@ This project implements a complete machine learning pipeline consisting of:
 - Train-test splitting
 - Feature standardization
 - Training of 10 machine learning models
+- Additional soft voting ensemble using LightGBM, XGBoost, and CatBoost
 - Model evaluation
 - Comparison with results reported in the reference study
 
@@ -167,6 +168,22 @@ The models are:
 - K-Nearest Neighbors (KNN)
 - Support Vector Classifier (SVC)
 
+### Additional Ensemble Experiment
+
+Implemented in:
+
+`experiments/05_soft_voting_ensemble.ipynb`
+
+The additional experiment combines:
+
+- LightGBM
+- XGBoost
+- CatBoost
+
+The three models are combined using **equal-weight soft voting**. Their predicted class probabilities are averaged, and the class with the highest average probability is selected as the final prediction.
+
+Unlike the original 10-model experiments, this ensemble uses **all 21 CTG input features** rather than the 10 features selected using SelectKBest. Because LightGBM, XGBoost, and CatBoost are tree-based models, feature standardization was not required for this experiment.
+
 ---
 
 ## Model Evaluation
@@ -185,10 +202,11 @@ Because the dataset is imbalanced, the class-specific precision, recall, and F1-
 
 ## Current Reimplementation Results
 
-The following results were obtained for the 10 models implemented in this project.
+The following results were obtained for the 10 reimplemented models and the additional soft voting ensemble.
 
-| Model | Reimplementation Accuracy |
-|-------|--------------------------:|
+| Model | Accuracy |
+|-------|---------:|
+| **Soft Voting Ensemble (21 features)** | **96.06%** |
 | LightGBM | 95.90% |
 | XGBoost | 95.58% |
 | Gradient Boosting | 95.58% |
@@ -199,6 +217,16 @@ The following results were obtained for the 10 models implemented in this projec
 | Support Vector Classifier | 91.96% |
 | Logistic Regression | 89.59% |
 | Linear Support Vector | 89.27% |
+
+For the soft voting ensemble, the additional imbalance-aware metrics were:
+
+| Metric | Score |
+|--------|------:|
+| Accuracy | **96.06%** |
+| Balanced Accuracy | **91.82%** |
+| Macro F1-score | **0.9377** |
+
+The ensemble achieved the highest observed test accuracy in the project. It also achieved strong balanced accuracy and macro F1-score, although the Suspect class remained more difficult to classify than the Normal and Pathological classes.
 
 ---
 
@@ -224,6 +252,22 @@ The reproduced results are close to the values reported in the reference paper a
 Small differences can arise from implementation details such as random train-test splitting, random seeds, library versions, and model hyperparameters. Not all implementation details required for exact numerical reproduction are necessarily specified in the reference paper.
 
 pp denotes percentage points.
+
+## Additional Soft Voting Ensemble Result
+
+The soft voting ensemble is an **additional experiment beyond the reference study** and is therefore not included in the paper-to-reimplementation comparison table above.
+
+The ensemble combines LightGBM, XGBoost, and CatBoost using equal weights:
+
+```text
+LightGBM + XGBoost + CatBoost
+            ↓
+  Average class probabilities
+            ↓
+      Final prediction
+```
+
+Using all 21 CTG features, the ensemble achieved **96.06% accuracy**, which is slightly higher than the best individual reimplementation result of **95.90%** from LightGBM.
 
 ---
 
@@ -255,6 +299,7 @@ matplotlib
 scikit-learn
 xgboost
 lightgbm
+catboost
 ucimlrepo
 joblib
 ```
@@ -270,46 +315,29 @@ For reproducibility, execute the notebooks in the following order:
 ```text
 1. experiments/01_data_preprocessing.ipynb
 
-2. experiments/02_eda_feature_selection.ipynb
+2. experiments/02_eda_feature_selection_train_test_split.ipynb
 
 3. experiments/03_mlp_gradient_boosting_xgboost_lightgbm_linear_svm.ipynb
-                         and
-   experiments/04_logistic_regression_knn_decision_tree_random_svm.ipynb
+
+4. experiments/04_logistic_regression_knn_decision_tree_random_forest_svm.ipynb
+
+5. experiments/05_soft_voting_ensemble.ipynb
 ```
 
-The two model-training notebooks can be executed independently after the preprocessing and feature-selection stages have generated the processed train and test datasets.
+The two original model-training notebooks can be executed independently after the preprocessing and feature-selection stages have generated the processed train and test datasets.
+
+The soft voting ensemble notebook is an additional experiment. It uses `fetal_health_cleaned.csv` so that all 21 CTG input features are available.
 
 ---
 
 ## Reproducibility
 
-- A fixed train-test split is used.
-- Random states are specified where supported.
-- The same selected features are used across models.
-- All models use the same training and testing datasets.
-- Standardization parameters are derived exclusively from the training set.
+- Fixed random states are specified where supported.
+- The 10 original reimplemented models use the same processed training and testing datasets.
+- The original model experiments use the 10 features selected with SelectKBest.
+- Standardization parameters for the original experiments are derived exclusively from the training set.
+- The soft voting extension uses all 21 CTG features with a 70/30 stratified split and `random_state=42`.
+- LightGBM, XGBoost, and CatBoost are not standardized in the ensemble experiment because they are tree-based models.
 - Processed datasets are stored separately from the raw data.
-
----
-
-## Contributors
-
-### Contributor 1 - ANANYA BELIMALLUR RAJASHEKAR
-
-- Multi-Layer Perceptron
-- Gradient Boosting
-- XGBoost
-- LightGBM
-- Linear Support Vector Machine
-- Model evaluation and comparison
-
-### Contributor 2 - AKSHATHA P
-
-- Logistic Regression
-- Decision Tree
-- Random Forest
-- K-Nearest Neighbors
-- Support Vector Classifier
-- Model evaluation and comparison
 
 ---
