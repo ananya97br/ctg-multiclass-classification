@@ -26,6 +26,7 @@ This project implements a complete machine learning pipeline consisting of:
 - Feature standardization
 - Training of 10 machine learning models
 - Additional soft voting ensemble using LightGBM, XGBoost, and CatBoost
+- Further tuning, imbalance-handling, feature-set, voting, and stacking experiments
 - Model evaluation
 - Comparison with results reported in the reference study
 
@@ -268,6 +269,31 @@ LightGBM + XGBoost + CatBoost
 ```
 
 Using all 21 CTG features, the ensemble achieved **96.06% accuracy**, which is slightly higher than the best individual reimplementation result of **95.90%** from LightGBM.
+
+---
+
+## Further Experiments
+
+Several follow-up experiments were conducted to test hyperparameter tuning, class-imbalance handling, use of all available features, and additional ensemble strategies. Unless otherwise noted, these experiments use the **10 features selected with SelectKBest**.
+
+For comparison, the main reimplementation baselines were **KNN: 93.85%**, **SVC: 91.96%**, **Random Forest: 95.27%**, and the best individual model, **LightGBM: 95.90%**.
+
+The boosted-model soft-voting run averages the class probabilities produced by **LightGBM, XGBoost, and CatBoost** using equal weights. It uses **all 21 CTG input features**, does **not** apply feature scaling, and uses a new **stratified 70/30 train-test split** with `random_state=42`. This run achieved approximately **96.06% accuracy**.
+
+| Experiment | Accuracy |
+|------------|---------:|
+| KNN, grid search (`k=3`, distance weights, Manhattan distance) | 94.01% |
+| SVM (RBF), grid search (`C=100`) | 95.11% |
+| Random Forest, 300 trees, fixed seed | 95.58% |
+| Random Forest, balanced class weights | 95.27% |
+| Random Forest, SMOTE oversampling | 94.95% |
+| Random Forest, all 21 features | 94.95% |
+| Random Forest, random search with cross-validation | 95.11% |
+| Soft voting: Logistic Regression + KNN + Random Forest + SVM | 95.11% |
+| Stacking: same four models, Logistic Regression meta-model | 95.27% |
+| **Soft voting: LightGBM + XGBoost + CatBoost, all 21 features** | **96.06%** |
+
+Among these follow-up experiments, the 300-tree Random Forest improved to **95.58%**, while balanced class weights and SMOTE did not improve on the original Random Forest baseline. The boosted-model soft-voting ensemble remained the highest-accuracy result among the experiments listed here.
 
 ---
 
